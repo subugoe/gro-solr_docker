@@ -6,7 +6,9 @@ Purpose
 
 This Docker image can be used to have a local Instance of the
 [Grid.ac](https://grid.ac/) (Global Research Identifier Database) data. This way
-you can even query the data offline.
+you can even query the data offline. During the build of the image it is figured
+out which is the latest version of the data. If the latest revision can’t be
+found the build will fail.
 
 Usage
 -----
