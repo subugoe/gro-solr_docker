@@ -4,7 +4,7 @@ MAINTAINER  Christian Mahnke (mahnke@sub.uni-goettingen.de)
 
 USER root
 
-ENV REQ_BUILD sudo tidy xmlstarlet jq xsltproc
+ENV REQ_BUILD tidy xmlstarlet jq xsltproc
 
 # Prepare to install
 # OS
@@ -69,9 +69,14 @@ RUN bin/solr start && \
     -H 'Content-type:application/json' \
     --data-binary @grid.json -X POST
 
+# Clean up a bit
+USER root
+RUN rm -rf schema.json schema-patch.xsl config-patch.xsl full_tables grid.*
+RUN apt-get --purge remove -y ${REQ_BUILD} && \
+	apt-get clean && \
+	rm -rf /var/lib/apt/lists/*
 
-
-
+USER $SOLR_USER
 
 EXPOSE 8983
 ENTRYPOINT ["docker-entrypoint.sh"]

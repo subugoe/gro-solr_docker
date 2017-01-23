@@ -9,12 +9,6 @@
             <xsl:apply-templates select="@*|node()"/>
         </xsl:copy>
     </xsl:template>
-    <!--
-    <xsl:template match="field[@name='OrgRef']">
-        <xsl:comment>Template patch as proposed by Peter</xsl:comment>
-        <field name="OrgRef" type="strings"/>
-    </xsl:template>
-    -->
     <xsl:template match="fieldType[@name='text_general']">
         <xsl:comment>Template patch as proposed by Peter</xsl:comment>
         <fieldType name="text_general" class="solr.TextField" positionIncrementGap="100" multiValued="true">
