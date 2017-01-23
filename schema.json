@@ -1,0 +1,20 @@
+{
+  "add-field":{ "name": "FundRef" , "type": "strings","stored":true},
+  "add-field":{ "name": "ISNI" , "type": "strings","stored":true},
+  "add-field":{ "name": "OrgRef" , "type": "strings","stored":true},
+  "add-field":{ "name": "Wikidata" , "type": "strings","stored":true},
+  "add-field":{ "name": "acronyms" , "type": "strings","stored":true},
+  "add-field":{ "name": "aliases" , "type": "strings","stored":true},
+  "add-field":{ "name": "city" , "type": "strings","stored":true},
+  "add-field":{ "name": "country" , "type": "strings","stored":true},
+  "add-field":{ "name": "country_code" , "type": "strings","stored":true},
+  "add-field":{ "name": "established" , "type": "tlongs","stored":true},
+  "add-field":{ "name": "links" , "type": "strings","stored":true},
+  "add-field":{ "name": "name" , "type": "strings","stored":true},
+  "add-field":{ "name": "relationship" , "type": "strings","stored":true},
+  "add-field":{ "name": "relationship_id" , "type": "strings","stored":true},
+  "add-field":{ "name": "state" , "type": "strings","stored":true},
+  "add-field":{ "name": "state_code" , "type": "strings","stored":true},
+  "add-field":{ "name": "types" , "type": "strings","stored":true},
+  "add-field":{ "name": "wikipedia_url" , "type": "strings","stored":true}
+}

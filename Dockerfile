@@ -1,10 +1,10 @@
-FROM solr:6.3.0
+FROM solr:5.5.3
 MAINTAINER  Christian Mahnke (mahnke@sub.uni-goettingen.de)
 #Partly taken from the pub_dev Dockerfile
 
 USER root
 
-ENV REQ_BUILD sudo tidy xmlstarlet jq
+ENV REQ_BUILD sudo tidy xmlstarlet jq xsltproc
 
 # Prepare to install
 # OS
@@ -29,8 +29,20 @@ RUN wget -O - http:$(wget -O - https://grid.ac/downloads | tidy -asxml -q --clea
 #Clear the input file. Fixes a literal \t 
 RUN sed -i -e 's/\\t//g' grid.json
 
-RUN bin/solr start && bin/solr create -c grid  && sleep 20 \
-   && curl 'http://0.0.0.0:8983/solr/grid/update/json/docs\
+
+# Setup Solr
+COPY schema.json .
+COPY schema-patch.xsl .
+COPY config-patch.xsl .
+RUN bin/solr start &&  bin/solr create -c grid && curl 'http://0.0.0.0:8983/solr/grid/schema' -H 'Content-type:application/json' \
+    --data-binary @schema.json && \
+    xsltproc schema-patch.xsl server/solr/grid/conf/managed-schema > server/solr/grid/conf/schema.xml && \
+    xsltproc config-patch.xsl server/solr/grid/conf/solrconfig.xml > server/solr/grid/conf/solrconfig.xml.patched && \
+    mv server/solr/grid/conf/solrconfig.xml.patched server/solr/grid/conf/solrconfig.xml
+
+## Populate index "grid" 
+RUN bin/solr start && \
+    curl 'http://0.0.0.0:8983/solr/grid/update/json/docs\
 ?split=/institutes\
 &f=id:/institutes/id\
 &f=name:/institutes/name\
@@ -55,7 +67,10 @@ RUN bin/solr start && bin/solr create -c grid  && sleep 20 \
 &f=relationship_id:/institutes/relationships/id\
 &commit=true'\
     -H 'Content-type:application/json' \
-    --data-binary @grid.json
+    --data-binary @grid.json -X POST
+
+
+
 
 
 EXPOSE 8983
