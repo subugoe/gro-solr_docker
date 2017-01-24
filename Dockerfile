@@ -4,7 +4,8 @@ MAINTAINER  Christian Mahnke (mahnke@sub.uni-goettingen.de)
 
 USER root
 
-ENV REQ_BUILD tidy xmlstarlet jq xsltproc
+ENV REQ_BUILD tidy xmlstarlet jq xsltproc python
+ENV CITIES_FILE cities1000
 
 # Prepare to install
 # OS
@@ -29,13 +30,12 @@ RUN wget -O - http:$(wget -O - https://grid.ac/downloads | tidy -asxml -q --clea
 #Clear the input file. Fixes a literal \t 
 RUN sed -i -e 's/\\t//g' grid.json
 
-
 # Setup Solr
 COPY schema.json .
 COPY schema-patch.xsl .
 COPY config-patch.xsl .
-RUN bin/solr start &&  bin/solr create -c grid && curl 'http://0.0.0.0:8983/solr/grid/schema' -H 'Content-type:application/json' \
-    --data-binary @schema.json && \
+RUN bin/solr start &&  bin/solr create -c grid && curl -X POST 'http://0.0.0.0:8983/solr/grid/schema' \
+    -H 'Content-type:application/json' --data-binary @schema.json && \
     xsltproc schema-patch.xsl server/solr/grid/conf/managed-schema > server/solr/grid/conf/schema.xml && \
     xsltproc config-patch.xsl server/solr/grid/conf/solrconfig.xml > server/solr/grid/conf/solrconfig.xml.patched && \
     mv server/solr/grid/conf/solrconfig.xml.patched server/solr/grid/conf/solrconfig.xml
@@ -65,13 +65,35 @@ RUN bin/solr start && \
 &f=country_code:/institutes/addresses/country_code\
 &f=relationship:/institutes/relationships/label\
 &f=relationship_id:/institutes/relationships/id\
+&f=geonames_id:/institutes/addresses/geonames_city/id\
+&f=status:/institutes/status\
+&f=lat:/institutes/addresses/lat\
+&f=lng:/institutes/addresses/lng\
 &commit=true'\
     -H 'Content-type:application/json' \
     --data-binary @grid.json -X POST
 
+#Get some GeoNames
+COPY jsonify.py .
+RUN wget http://download.geonames.org/export/dump/$CITIES_FILE.zip && unzip $CITIES_FILE.zip && \
+    python jsonify.py -g $CITIES_FILE.txt > $CITIES_FILE.json && \
+    bin/solr start &&  bin/solr create -c geonames && \
+    curl 'http://0.0.0.0:8983/solr/geonames/update/json/docs\
+?split=/\
+&f=id:/id\
+&f=name:/name\
+&f=alternate_names:/alternate_names\
+&f=coordinates:/coordinates\
+&f=country:/country\
+&f=population:/population\
+&f=timezone:/timezone\
+&commit=true'\
+    -H 'Content-type:application/json' \
+    --data-binary @$CITIES_FILE.json -X POST
+
 # Clean up a bit
 USER root
-RUN rm -rf schema.json schema-patch.xsl config-patch.xsl full_tables grid.*
+RUN rm -rf schema.json schema-patch.xsl config-patch.xsl full_tables grid.* $CITIES_FILE*
 RUN apt-get --purge remove -y ${REQ_BUILD} && \
 	apt-get clean && \
 	rm -rf /var/lib/apt/lists/*

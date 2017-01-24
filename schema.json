@@ -16,5 +16,9 @@
   "add-field":{ "name": "state" , "type": "strings","stored":true},
   "add-field":{ "name": "state_code" , "type": "strings","stored":true},
   "add-field":{ "name": "types" , "type": "strings","stored":true},
-  "add-field":{ "name": "wikipedia_url" , "type": "strings","stored":true}
+  "add-field":{ "name": "wikipedia_url" , "type": "strings","stored":true},
+  "add-field":{ "name": "geonames_id" , "type": "strings","stored":true},
+  "add-field":{ "name": "status" , "type": "strings","stored":true},
+  "add-field":{ "name": "lat" , "type": "strings","stored":true},
+  "add-field":{ "name": "lng" , "type": "strings","stored":true}
 }
